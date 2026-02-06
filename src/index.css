@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* Design tokens for Cartographic Luxury theme */
+@theme {
+  /* Color palette */
+  --color-ocean: #080c18;
+  --color-land: #162036;
+  --color-land-hover: #1e2d4a;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-text-primary: #e8e4df;
+  --color-text-secondary: rgba(232, 228, 223, 0.45);
+  --color-accent: #c9a96e;
+  --color-accent-glow: rgba(201, 169, 110, 0.15);
+  --color-glass-bg: rgba(10, 14, 26, 0.65);
+  --color-glass-border: rgba(201, 169, 110, 0.08);
+
+  /* Typography */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-ui: 'Satoshi', system-ui, sans-serif;
+}
+
+/* Base styles */
+html, body, #root {
+  width: 100%;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--color-ocean);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animation keyframes */
+@keyframes flag-reveal {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse-scale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* Animation utilities */
+.animate-flag-reveal {
+  animation: flag-reveal 800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Glass morphism utility */
+.glass {
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(40px) saturate(1.2);
+  -webkit-backdrop-filter: blur(40px) saturate(1.2);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Typography utilities */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-ui {
+  font-family: var(--font-ui);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
