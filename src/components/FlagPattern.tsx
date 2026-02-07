@@ -11,35 +11,52 @@ interface FlagPatternProps {
 export default function FlagPattern({ countryId, pathGenerator, geometry }: FlagPatternProps) {
   const alpha2 = getAlpha2(countryId)
 
-  // Calculate bounding box of the country path for pattern sizing
-  const bounds = useMemo(() => pathGenerator.bounds(geometry), [geometry, pathGenerator])
+  // Calculate centroid and bounds for proper flag placement
+  const { centroid, patternSize } = useMemo(() => {
+    const bounds = pathGenerator.bounds(geometry)
+    const [[x0, y0], [x1, y1]] = bounds
+    const width = x1 - x0
+    const height = y1 - y0
+
+    // Use centroid for centering the flag
+    const center = pathGenerator.centroid(geometry)
+
+    // For countries with overseas territories (huge bounds), cap the pattern size
+    // Use the larger dimension to ensure full coverage, with a reasonable max
+    const maxDim = Math.min(Math.max(width, height), 800)
+
+    // Pattern size maintains 3:2 flag aspect ratio
+    const patternWidth = maxDim * 1.5
+    const patternHeight = maxDim
+
+    return {
+      centroid: center,
+      patternSize: { width: patternWidth, height: patternHeight },
+    }
+  }, [geometry, pathGenerator])
 
   if (!alpha2) return null
+  if (!isFinite(centroid[0]) || !isFinite(centroid[1])) return null
 
-  const [[x0, y0], [x1, y1]] = bounds
-  const width = x1 - x0
-  const height = y1 - y0
-
-  // Skip if dimensions are invalid
-  if (width <= 0 || height <= 0 || !isFinite(width) || !isFinite(height)) {
-    return null
-  }
+  // Position pattern centered on the country's centroid
+  const patternX = centroid[0] - patternSize.width / 2
+  const patternY = centroid[1] - patternSize.height / 2
 
   return (
     <pattern
       id={`flag-${countryId}`}
       patternUnits="userSpaceOnUse"
-      x={x0}
-      y={y0}
-      width={width}
-      height={height}
+      x={patternX}
+      y={patternY}
+      width={patternSize.width}
+      height={patternSize.height}
     >
       <image
         href={getFlagUrl(alpha2)}
         x={0}
         y={0}
-        width={width}
-        height={height}
+        width={patternSize.width}
+        height={patternSize.height}
         preserveAspectRatio="xMidYMid slice"
       />
     </pattern>
