@@ -43,16 +43,6 @@ export function useMapZoom(
     svg.call(zoom)
     zoomBehaviorRef.current = zoom
 
-    // Initial subtle zoom-in animation on load
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!prefersReducedMotion) {
-      svg
-        .transition()
-        .duration(1200)
-        .ease(d3.easeCubicOut)
-        .call(zoom.scaleTo, 1.15)
-    }
-
     return () => {
       svg.on('.zoom', null)
     }

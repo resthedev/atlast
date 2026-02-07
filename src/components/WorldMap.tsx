@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback, useLayoutEffect } from 'react'
 import * as topojson from 'topojson-client'
 import type { Topology } from 'topojson-specification'
 import { createProjection, createPathGenerator } from '@/lib/mapProjection'
@@ -17,8 +17,45 @@ export default function WorldMap() {
     width: window.innerWidth,
     height: window.innerHeight,
   })
+  // Track countries currently animating their flag reveal
+  const [animatingCountries, setAnimatingCountries] = useState<Set<string>>(new Set())
+  const prevVisitedRef = useRef<Set<string> | null>(null) // null = first render
 
   const { visitedSet, toggleVisit } = useTravelLog()
+
+  // Detect newly visited countries and trigger animation
+  useLayoutEffect(() => {
+    const prevVisited = prevVisitedRef.current
+
+    // Skip first render (initial load from database)
+    if (prevVisited === null) {
+      prevVisitedRef.current = new Set(visitedSet)
+      return
+    }
+
+    const newlyVisited = new Set<string>()
+
+    visitedSet.forEach((id) => {
+      if (!prevVisited.has(id)) {
+        newlyVisited.add(id)
+      }
+    })
+
+    if (newlyVisited.size > 0) {
+      setAnimatingCountries((prev) => new Set([...prev, ...newlyVisited]))
+
+      // Clear animation state after animation completes
+      setTimeout(() => {
+        setAnimatingCountries((prev) => {
+          const next = new Set(prev)
+          newlyVisited.forEach((id) => next.delete(id))
+          return next
+        })
+      }, 550) // Match animation duration
+    }
+
+    prevVisitedRef.current = new Set(visitedSet)
+  }, [visitedSet])
 
   // Handle window resize
   useEffect(() => {
@@ -63,18 +100,6 @@ export default function WorldMap() {
     (e: React.MouseEvent<SVGPathElement>, feature: CountryFeature) => {
       // Prevent the click from being captured by the zoom behavior
       e.stopPropagation()
-
-      // Brief scale pulse animation
-      const target = e.currentTarget
-      target.style.transformOrigin = 'center'
-      target.style.transform = 'scale(1.02)'
-      target.style.transition = 'transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1)'
-
-      setTimeout(() => {
-        target.style.transform = 'scale(1)'
-        target.style.transition = 'transform 300ms cubic-bezier(0.22, 1, 0.36, 1)'
-      }, 150)
-
       toggleVisit(feature.id)
     },
     [toggleVisit]
@@ -92,13 +117,13 @@ export default function WorldMap() {
 
   return (
     <svg
-      ref={svgRef}
-      width="100%"
-      height="100%"
-      viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-      className="bg-[var(--color-ocean)] touch-none select-none"
-      style={{ cursor: 'grab' }}
-    >
+        ref={svgRef}
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+        className="bg-[var(--color-ocean)] touch-none select-none"
+        style={{ cursor: 'grab' }}
+      >
       {/* Flag pattern definitions */}
       <defs>
         {countries
@@ -118,19 +143,24 @@ export default function WorldMap() {
         {/* Country paths */}
         {countries.map((country) => {
           const isVisited = visitedSet.has(country.id)
+          const isAnimating = animatingCountries.has(country.id)
           const d = pathGenerator(country.geometry) || ''
 
           return (
-            <path
-              key={country.id}
-              d={d}
-              fill={isVisited ? `url(#flag-${country.id})` : 'var(--color-land)'}
-              stroke="var(--color-border)"
-              strokeWidth={0.5}
-              className="cursor-pointer transition-[fill] duration-500 hover:brightness-110"
-              onClick={(e) => handleCountryClick(e, country)}
-              style={{ willChange: 'fill, transform' }}
-            />
+            <g key={country.id}>
+              {/* Base country path */}
+              <path
+                d={d}
+                fill={isVisited ? `url(#flag-${country.id})` : 'var(--color-land)'}
+                stroke="var(--color-border)"
+                strokeWidth={0.5}
+                className={`cursor-pointer hover:brightness-110 ${
+                  isAnimating ? 'animate-flag-snap' : ''
+                }`}
+                onClick={(e) => handleCountryClick(e, country)}
+                style={{ willChange: 'fill, transform' }}
+              />
+            </g>
           )
         })}
 

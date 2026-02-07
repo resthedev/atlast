@@ -207,8 +207,9 @@ export function numericCodeFromAlpha3(alpha3: string): string | undefined {
   return Object.values(COUNTRY_MAP).find((c) => c.alpha3 === alpha3)?.numericCode
 }
 
-export function getFlagUrl(alpha2: string, width: number = 640): string {
-  return `https://flagcdn.com/w${width}/${alpha2.toLowerCase()}.png`
+export function getFlagUrl(alpha2: string): string {
+  // Use SVG flags for infinite scalability - stays crisp at any zoom level
+  return `https://flagcdn.com/${alpha2.toLowerCase()}.svg`
 }
 
 export const TOTAL_COUNTRIES = Object.keys(COUNTRY_MAP).length

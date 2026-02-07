@@ -61,6 +61,22 @@ html, body, #root {
   100% { transform: scale(1); }
 }
 
+/* Flag reveal animation - subtle pulse */
+@keyframes flag-celebrate {
+  0% {
+    transform: scale(1);
+    filter: brightness(1.2);
+  }
+  40% {
+    transform: scale(1.015);
+    filter: brightness(1.1);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
 /* Animation utilities */
 .animate-flag-reveal {
   animation: flag-reveal 800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -72,6 +88,12 @@ html, body, #root {
 
 .animate-slide-up {
   animation: slide-up 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-flag-snap {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: flag-celebrate 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* Glass morphism utility */

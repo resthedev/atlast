@@ -35,7 +35,7 @@ export default function FlagPattern({ countryId, pathGenerator, geometry }: Flag
       height={height}
     >
       <image
-        href={getFlagUrl(alpha2, 640)}
+        href={getFlagUrl(alpha2)}
         x={0}
         y={0}
         width={width}
