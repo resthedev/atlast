@@ -52,8 +52,8 @@ export default function WorldMap() {
   )
   const pathGenerator = useMemo(() => createPathGenerator(projection), [projection])
 
-  // D3 zoom
-  const { zoomState } = useMapZoom(svgRef, gRef, dimensions)
+  // D3 zoom - only enable after topology loads so the effect runs when SVG is ready
+  const { zoomState } = useMapZoom(svgRef, gRef, dimensions, !!topology)
 
   // Label visibility
   const visibleLabels = useLabelVisibility(countries, pathGenerator, zoomState)

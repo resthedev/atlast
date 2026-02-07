@@ -8,13 +8,14 @@ const SCALE_EXTENT: [number, number] = [1, 12]
 export function useMapZoom(
   svgRef: RefObject<SVGSVGElement | null>,
   gRef: RefObject<SVGGElement | null>,
-  dimensions: { width: number; height: number }
+  dimensions: { width: number; height: number },
+  enabled: boolean = true
 ) {
   const [zoomState, setZoomState] = useState<ZoomState>(INITIAL_ZOOM)
   const zoomBehaviorRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>(null)
 
   useEffect(() => {
-    if (!svgRef.current || !gRef.current) return
+    if (!enabled || !svgRef.current || !gRef.current) return
 
     const svg = d3.select(svgRef.current)
     const g = d3.select(gRef.current)
@@ -55,7 +56,7 @@ export function useMapZoom(
     return () => {
       svg.on('.zoom', null)
     }
-  }, [svgRef, gRef, dimensions])
+  }, [svgRef, gRef, dimensions, enabled])
 
   return { zoomState }
 }
