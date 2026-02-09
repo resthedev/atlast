@@ -6,6 +6,18 @@ import { COUNTRY_MAP } from '@/lib/countries'
 const MIN_AREA_THRESHOLD = 2000 // minimum screen-space area (px^2) to show label
 const LABEL_PADDING = 4
 
+// Manual centroid overrides for countries with overseas territories
+// These coordinates represent the visual center of the main landmass
+// Format: [longitude, latitude] in geographic coordinates
+const CENTROID_OVERRIDES: Record<string, [number, number]> = {
+  '250': [2.5, 46.5], // France - mainland France center
+  '840': [-98, 39], // USA - continental US center
+  '643': [100, 60], // Russia - European Russia / Urals area
+  '578': [10, 62], // Norway - mainland Norway
+  '528': [5.5, 52.5], // Netherlands - mainland Netherlands
+  '826': [-2, 54], // United Kingdom - Great Britain center
+}
+
 interface Rect {
   x: number
   y: number
@@ -27,11 +39,25 @@ export function useLabelVisibility(
   pathGenerator: GeoPath<unknown, GeoPermissibleObjects>,
   zoomState: ZoomState
 ): LabelData[] {
+  // Get projection for converting override coordinates
+  const projection = pathGenerator.projection()
+
   // Precompute centroids and base areas
   const countryData = useMemo(() => {
     return countries
       .map((feature) => {
-        const centroid = pathGenerator.centroid(feature.geometry)
+        // Check for manual centroid override (for countries with overseas territories)
+        const override = CENTROID_OVERRIDES[feature.id]
+        let centroid: [number, number]
+
+        if (override && projection && typeof projection === 'function') {
+          // Project geographic coordinates to screen coordinates
+          const projected = (projection as (point: [number, number]) => [number, number] | null)(override)
+          centroid = projected || pathGenerator.centroid(feature.geometry)
+        } else {
+          centroid = pathGenerator.centroid(feature.geometry)
+        }
+
         const bounds = pathGenerator.bounds(feature.geometry)
         const [[x0, y0], [x1, y1]] = bounds
         const baseArea = (x1 - x0) * (y1 - y0)
@@ -44,7 +70,7 @@ export function useLabelVisibility(
         }
       })
       .filter((c) => c.name && !isNaN(c.centroid[0]) && !isNaN(c.centroid[1]))
-  }, [countries, pathGenerator])
+  }, [countries, pathGenerator, projection])
 
   // Compute visible labels based on current zoom
   const labels = useMemo(() => {
