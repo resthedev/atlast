@@ -4,6 +4,7 @@ import WorldMap from '@/components/WorldMap'
 import StatsOverlay from '@/components/StatsOverlay'
 import AuthButton from '@/components/AuthButton'
 import Toast from '@/components/Toast'
+import Leaderboard from '@/components/Leaderboard'
 import SignInScreen from '@/components/SignInScreen'
 
 function AppContent() {
@@ -30,6 +31,7 @@ function AppContent() {
     <div className="fixed inset-0 overflow-hidden bg-[var(--color-ocean)]">
       <WorldMap />
       <StatsOverlay />
+      <Leaderboard />
       <AuthButton />
       <Toast />
     </div>

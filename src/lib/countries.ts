@@ -213,3 +213,41 @@ export function getFlagUrl(alpha2: string): string {
 }
 
 export const TOTAL_COUNTRIES = Object.keys(COUNTRY_MAP).length
+
+/**
+ * Real-world travel popularity scores (approximate international tourist
+ * arrivals in millions, ~2023 UNWTO data). Used to sort flag stacks so the
+ * most recognisable destinations surface first.
+ */
+export const COUNTRY_POPULARITY: Record<string, number> = {
+  // Tier 1 — mega-destinations (30M+)
+  FRA: 100, ESP: 85, USA: 66, ITA: 57, TUR: 56,
+  MEX: 42, GBR: 38, DEU: 36, GRC: 33, AUT: 32,
+
+  // Tier 2 — major destinations (15–30M)
+  THA: 28, SAU: 27, PRT: 27, MYS: 26, JPN: 25,
+  ARE: 25, CAN: 23, CHN: 22, NLD: 21, POL: 20,
+  HRV: 20, IND: 18, HUN: 17, MAR: 15,
+
+  // Tier 3 — popular destinations (7–15M)
+  CZE: 14, IDN: 12, KOR: 11, VNM: 10, IRL: 10,
+  CHE: 10, DNK: 10, EGY: 9, BRA: 9, BEL: 9,
+  AUS: 8, ZAF: 8, ARG: 8, DOM: 8, NOR: 7,
+  COL: 7, GEO: 7,
+
+  // Tier 4 — notable destinations (3–7M)
+  TUN: 6, TWN: 6, PER: 5, PHL: 5, CHL: 5,
+  KHM: 5, CUB: 4, ISR: 4, JOR: 4, NZL: 4,
+  FIN: 4, EST: 4, BGR: 4, ROU: 4, LKA: 3,
+  SRB: 3, SVN: 3, CRI: 3, PAN: 3, ALB: 3,
+
+  // Tier 5 — emerging / niche destinations (1–3M)
+  ISL: 2, ECU: 2, KEN: 2, NPL: 2, SVK: 2,
+  MNE: 2, LTU: 2, LVA: 2, URY: 2, GTM: 2,
+  JAM: 2, MMR: 1, SEN: 1, TZA: 1, BOL: 1,
+  MNG: 1, UZB: 1, RWA: 1, LUX: 1, MDA: 1,
+}
+
+export function getCountryPopularity(alpha3: string): number {
+  return COUNTRY_POPULARITY[alpha3] ?? 0
+}

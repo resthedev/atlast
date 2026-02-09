@@ -41,6 +41,7 @@ export function useMapZoom(
       })
 
     svg.call(zoom)
+    svg.on('dblclick.zoom', null) // Disable double-click to zoom
     zoomBehaviorRef.current = zoom
 
     return () => {

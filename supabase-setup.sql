@@ -35,3 +35,91 @@ CREATE INDEX IF NOT EXISTS idx_visited_countries_user
 
 -- Grant access to authenticated users
 GRANT ALL ON visited_countries TO authenticated;
+
+-- ============================================================
+-- Leaderboard: profiles table, trigger, and RPC function
+-- ============================================================
+
+-- Public profiles table (mirrors select fields from auth.users)
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  display_name TEXT,
+  avatar_url TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Everyone can read profiles (needed for leaderboard)
+CREATE POLICY "Profiles are publicly readable"
+  ON profiles FOR SELECT
+  USING (true);
+
+-- Users can update their own profile
+CREATE POLICY "Users can update own profile"
+  ON profiles FOR UPDATE
+  USING (auth.uid() = id);
+
+-- Users can insert their own profile
+CREATE POLICY "Users can insert own profile"
+  ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+GRANT SELECT ON profiles TO authenticated;
+
+-- Auto-populate profile when a new user signs up via Google OAuth
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO profiles (id, display_name, avatar_url)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', 'Traveler'),
+    NEW.raw_user_meta_data->>'avatar_url'
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    display_name = COALESCE(EXCLUDED.display_name, profiles.display_name),
+    avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url),
+    updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- One-time backfill for existing users (run once after creating the table)
+-- INSERT INTO profiles (id, display_name, avatar_url)
+-- SELECT
+--   id,
+--   COALESCE(raw_user_meta_data->>'full_name', raw_user_meta_data->>'name', 'Traveler'),
+--   raw_user_meta_data->>'avatar_url'
+-- FROM auth.users
+-- ON CONFLICT (id) DO NOTHING;
+
+-- Leaderboard RPC: returns users ranked by countries visited
+CREATE OR REPLACE FUNCTION get_leaderboard(result_limit INT DEFAULT 10)
+RETURNS TABLE (
+  user_id UUID,
+  display_name TEXT,
+  avatar_url TEXT,
+  country_count BIGINT,
+  country_codes TEXT[]
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    p.id AS user_id,
+    p.display_name,
+    p.avatar_url,
+    COUNT(vc.country_code) AS country_count,
+    ARRAY_AGG(vc.country_code ORDER BY vc.visited_at DESC) AS country_codes
+  FROM profiles p
+  LEFT JOIN visited_countries vc ON vc.user_id = p.id
+  GROUP BY p.id, p.display_name, p.avatar_url
+  HAVING COUNT(vc.country_code) > 0
+  ORDER BY country_count DESC, p.display_name ASC
+  LIMIT result_limit;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

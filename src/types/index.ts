@@ -32,3 +32,11 @@ export interface LabelData {
   area: number // screen-space area at current zoom
   visible: boolean
 }
+
+export interface LeaderboardEntry {
+  user_id: string
+  display_name: string
+  avatar_url: string | null
+  country_count: number
+  country_codes: string[] // alpha-3 codes, ordered by most recent visit
+}
