@@ -100,7 +100,6 @@ html, body, #root {
 .glass {
   background: var(--color-glass-bg);
   backdrop-filter: blur(40px) saturate(1.2);
-  -webkit-backdrop-filter: blur(40px) saturate(1.2);
   border: 1px solid var(--color-glass-border);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
