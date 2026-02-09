@@ -76,7 +76,7 @@ export default function AuthButton() {
         )}
 
         <span className="absolute bottom-1.5 right-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[var(--color-ocean)]/85 ring-1 ring-[var(--color-glass-border)]">
-          <span className="inline-flex flex-col gap-[2px]">
+          <span className="inline-flex flex-col gap-px">
             <span className="h-[1px] w-2 rounded bg-[var(--color-accent)]" />
             <span className="h-[1px] w-2 rounded bg-[var(--color-accent)]" />
             <span className="h-[1px] w-2 rounded bg-[var(--color-accent)]" />

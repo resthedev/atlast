@@ -1,5 +1,6 @@
 import { useTravelLog } from '@/context/TravelLogContext'
 import { TOTAL_COUNTRIES } from '@/lib/countries'
+import RollingNumber from '@/components/RollingNumber'
 
 export default function StatsOverlay() {
   const { visitedCount } = useTravelLog()
@@ -25,7 +26,7 @@ export default function StatsOverlay() {
             textShadow: '0 0 30px var(--color-accent-glow)',
           }}
         >
-          {visitedCount}
+          <RollingNumber value={visitedCount} />
         </span>
         <span className="text-sm text-[var(--color-text-secondary)]">
           / {TOTAL_COUNTRIES}

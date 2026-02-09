@@ -1,3 +1,3 @@
 - [ ] Fix Russia, France
 - [ ] Move Sign Out into hamburger menut that opens, just keep user profle pic in circular bubble
-- [ ] Number animation for countries visited
+- [x] Number animation for countries visited

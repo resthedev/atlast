@@ -135,6 +135,9 @@ Use and extend the existing CSS variables in `/src/index.css`:
 - Prefer translucent or atmospheric surfaces for floating UI.
 - Use borders and shadows to clarify elevation layers.
 - Keep blur and glow tasteful; avoid over-frosting every element.
+- Use shared glass utilities for consistency:
+  - `.glass`: primary floating panels/controls with medium-strong blur.
+  - `.glass-soft`: compact chips/badges with softer blur.
 
 ## 7.2 Reusable component traits
 
