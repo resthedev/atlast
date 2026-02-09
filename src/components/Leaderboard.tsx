@@ -329,8 +329,8 @@ function LeaderboardRow({
 }
 
 export default function Leaderboard() {
-  const { user } = useTravelLog()
-  const { entries, loading } = useLeaderboard()
+  const { user, leaderboardRefreshKey } = useTravelLog()
+  const { entries, loading } = useLeaderboard(leaderboardRefreshKey)
   const [expanded, setExpanded] = useState(false)
 
   if (loading || entries.length === 0) return null

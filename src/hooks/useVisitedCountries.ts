@@ -3,7 +3,10 @@ import { supabase } from '@/lib/supabase'
 import { getAlpha3, numericCodeFromAlpha3, getCountryName } from '@/lib/countries'
 import { useAuth } from './useAuth'
 
-export function useVisitedCountries(showToast?: (msg: string) => void) {
+export function useVisitedCountries(
+  showToast?: (msg: string) => void,
+  onVisitPersisted?: () => void
+) {
   const { user } = useAuth()
   const [visitedSet, setVisitedSet] = useState<Set<string>>(new Set()) // stores numeric codes
   const [loading, setLoading] = useState(true)
@@ -85,6 +88,8 @@ export function useVisitedCountries(showToast?: (msg: string) => void) {
             return reverted
           })
           if (showToast) showToast('Failed to save. Please try again.')
+        } else {
+          onVisitPersisted?.()
         }
       } else {
         const { error } = await supabase.from('visited_countries').insert({
@@ -102,10 +107,12 @@ export function useVisitedCountries(showToast?: (msg: string) => void) {
             return reverted
           })
           if (showToast) showToast('Failed to save. Please try again.')
+        } else {
+          onVisitPersisted?.()
         }
       }
     },
-    [user, visitedSet, showToast]
+    [user, visitedSet, showToast, onVisitPersisted]
   )
 
   return {

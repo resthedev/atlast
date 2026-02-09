@@ -6,7 +6,7 @@ import type { LeaderboardEntry } from '@/types'
 const LEADERBOARD_LIMIT = 10
 const REFRESH_INTERVAL_MS = 60_000
 
-export function useLeaderboard() {
+export function useLeaderboard(refreshKey?: number) {
   const { user } = useAuth()
   const [entries, setEntries] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,7 +36,7 @@ export function useLeaderboard() {
 
     const interval = setInterval(fetchLeaderboard, REFRESH_INTERVAL_MS)
     return () => clearInterval(interval)
-  }, [user, fetchLeaderboard])
+  }, [user, fetchLeaderboard, refreshKey])
 
   return { entries, loading }
 }

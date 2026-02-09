@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from 'react'
+import { createContext, useContext, useState, type ReactNode } from 'react'
 import { useVisitedCountries } from '@/hooks/useVisitedCountries'
 import { useToast } from '@/hooks/useToast'
 import { useAuth } from '@/hooks/useAuth'
@@ -15,6 +15,7 @@ interface TravelLogContextType {
   toggleVisit: (numericCode: string) => Promise<void>
   visitedCount: number
   visitedLoading: boolean
+  leaderboardRefreshKey: number
   // Toast
   toastMessage: string
   toastVisible: boolean
@@ -27,7 +28,10 @@ const TravelLogContext = createContext<TravelLogContextType | null>(null)
 export function TravelLogProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth()
   const toast = useToast()
-  const visited = useVisitedCountries(toast.showToast)
+  const [leaderboardRefreshKey, setLeaderboardRefreshKey] = useState(0)
+  const visited = useVisitedCountries(toast.showToast, () =>
+    setLeaderboardRefreshKey((key) => key + 1)
+  )
 
   return (
     <TravelLogContext.Provider
@@ -40,6 +44,7 @@ export function TravelLogProvider({ children }: { children: ReactNode }) {
         toggleVisit: visited.toggleVisit,
         visitedCount: visited.visitedCount,
         visitedLoading: visited.loading,
+        leaderboardRefreshKey,
         toastMessage: toast.message,
         toastVisible: toast.visible,
         showToast: toast.showToast,
