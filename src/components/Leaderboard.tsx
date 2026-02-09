@@ -24,7 +24,7 @@ function FlagChip({ alpha2, name, size, overlap, zIndex }: {
     if (imgRef.current) {
       const rect = imgRef.current.getBoundingClientRect()
       setTipPos({
-        top: rect.top - 6,
+        top: rect.top,
         left: rect.left + rect.width / 2,
       })
     }
@@ -59,9 +59,9 @@ function FlagChip({ alpha2, name, size, overlap, zIndex }: {
           style={{
             top: tipPos.top,
             left: tipPos.left,
-            transform: 'translate(-50%, -100%)',
-            padding: '3px 8px',
-            fontSize: 10,
+            transform: 'translate(-50%, calc(-100% - 6px))',
+            padding: '5px 10px',
+            fontSize: 12,
             fontFamily: 'var(--font-ui)',
             color: 'var(--color-text-primary)',
             whiteSpace: 'nowrap',
@@ -78,7 +78,10 @@ function FlagChip({ alpha2, name, size, overlap, zIndex }: {
   )
 }
 
-const OVERFLOW_GAP = 6
+const OVERFLOW_GAP = 20
+const OVERFLOW_BRIDGE_SIDE_PADDING = 20
+const OVERFLOW_TOOLTIP_HOVER_PAD_X = 12
+const OVERFLOW_TOOLTIP_HOVER_PAD_Y = 10
 
 function FlagStack({ countryCodes }: { countryCodes: string[] }) {
   const [showOverflow, setShowOverflow] = useState(false)
@@ -148,7 +151,7 @@ function FlagStack({ countryCodes }: { countryCodes: string[] }) {
             color: 'var(--color-accent)',
             border: '1.5px solid rgba(201, 169, 110, 0.12)',
             fontFamily: 'var(--font-ui)',
-            fontSize: 9,
+            fontSize: 11,
             fontWeight: 600,
             letterSpacing: '-0.02em',
           }}
@@ -172,35 +175,59 @@ function FlagStack({ countryCodes }: { countryCodes: string[] }) {
             onMouseEnter={openTooltip}
             onMouseLeave={closeTooltip}
           >
-            {/* Visible tooltip content */}
-            <div
-              className="glass rounded-xl"
-              style={{
-                padding: '8px 10px',
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 4,
-                maxWidth: 160,
-                animation: 'slide-up 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards',
-              }}
-            >
-              {overflowCodes.map((alpha3) => {
-                const meta = getCountryByAlpha3(alpha3)
-                if (!meta) return null
-                return (
-                  <FlagChip
-                    key={alpha3}
-                    alpha2={meta.alpha2}
-                    name={meta.name}
-                    size={24}
-                    overlap={0}
-                    zIndex={1}
-                  />
-                )
-              })}
+            <div className="relative">
+              {/* Invisible hover padding around tooltip on all edges */}
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  top: -OVERFLOW_TOOLTIP_HOVER_PAD_Y,
+                  left: -OVERFLOW_TOOLTIP_HOVER_PAD_X,
+                  right: -OVERFLOW_TOOLTIP_HOVER_PAD_X,
+                  bottom: -OVERFLOW_TOOLTIP_HOVER_PAD_Y,
+                }}
+              />
+
+              {/* Visible tooltip content */}
+              <div
+                className="glass rounded-xl"
+                style={{
+                  padding: '8px 10px',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 4,
+                  maxWidth: 160,
+                  animation: 'slide-up 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                }}
+              >
+                {overflowCodes.map((alpha3) => {
+                  const meta = getCountryByAlpha3(alpha3)
+                  if (!meta) return null
+                  return (
+                    <FlagChip
+                      key={alpha3}
+                      alpha2={meta.alpha2}
+                      name={meta.name}
+                      size={24}
+                      overlap={0}
+                      zIndex={1}
+                    />
+                  )
+                })}
+              </div>
+
+              {/* Invisible bridge connecting tooltip to +N badge */}
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: -OVERFLOW_BRIDGE_SIDE_PADDING,
+                  right: -OVERFLOW_BRIDGE_SIDE_PADDING,
+                  height: OVERFLOW_GAP,
+                }}
+              />
             </div>
-            {/* Invisible bridge connecting tooltip to badge */}
-            <div style={{ height: OVERFLOW_GAP, width: '100%' }} />
           </div>,
           document.body
         )}
@@ -235,7 +262,7 @@ function LeaderboardRow({
     >
       {/* Rank */}
       <span
-        className="font-display text-sm w-4 text-right shrink-0"
+        className="font-display text-[15px] w-4 text-right shrink-0"
         style={{
           color: rank <= 3 ? 'var(--color-accent)' : 'var(--color-text-secondary)',
           fontVariantNumeric: 'tabular-nums',
@@ -277,7 +304,7 @@ function LeaderboardRow({
       {/* Name + Count */}
       <div className="flex flex-col min-w-0 gap-0">
         <span
-          className="text-[13px] truncate leading-tight"
+          className="text-[15px] font-medium truncate leading-tight"
           style={{
             color: isCurrentUser
               ? 'var(--color-text-primary)'
@@ -288,7 +315,7 @@ function LeaderboardRow({
           {firstName}
         </span>
         <span
-          className="text-[11px] leading-tight"
+          className="text-[13px] leading-tight"
           style={{ color: 'var(--color-text-secondary)' }}
         >
           {entry.country_count} {entry.country_count === 1 ? 'country' : 'countries'}
@@ -354,7 +381,7 @@ export default function Leaderboard() {
             />
           ) : (
             <div
-              className="rounded-full flex items-center justify-center text-[10px]"
+              className="rounded-full flex items-center justify-center text-[11px]"
               style={{
                 width: 20,
                 height: 20,
@@ -366,7 +393,7 @@ export default function Leaderboard() {
             </div>
           )}
           <span
-            className="font-display text-sm"
+            className="font-display text-[15px]"
             style={{
               color: 'var(--color-accent)',
               fontVariantNumeric: 'tabular-nums',
@@ -426,7 +453,7 @@ export default function Leaderboard() {
             />
           </svg>
           <span
-            className="text-xs tracking-widest uppercase"
+            className="text-[11px] tracking-widest uppercase"
             style={{
               color: 'var(--color-text-secondary)',
               letterSpacing: '0.1em',
